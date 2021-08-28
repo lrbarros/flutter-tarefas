@@ -22,11 +22,12 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     _readData().then((content) {
-     setState(() {
-       _todoList = json.decode(content);
-     });
+      setState(() {
+        _todoList = json.decode(content);
+      });
     });
   }
+
   final _todoController = TextEditingController();
 
   List _todoList = [];
@@ -78,29 +79,43 @@ class _HomeState extends State<Home> {
               )),
           Expanded(
             child: ListView.builder(
-                padding: EdgeInsets.only(top: 10.0),
-                itemCount: _todoList.length,
-                itemBuilder: (context, index) {
-                  return CheckboxListTile(
-                    title: Text(_todoList[index]["title"]),
-                    value: _todoList[index]["ok"],
-                    secondary: CircleAvatar(
-                      child: Icon(
-                          (_todoList[index]["ok"] ? Icons.check : Icons.error)),
-                    ),
-                    onChanged: (c) {
-                      setState(() {
-                        _todoList[index]["ok"] = c;
-                        _saveData();
-                      });
-                    },
-                  );
-                }),
+              padding: EdgeInsets.only(top: 10.0),
+              itemCount: _todoList.length,
+              itemBuilder: buildItem,
+            ),
           ),
         ],
       ),
     );
   }
+
+  Widget buildItem(context, index) {
+    return Dismissible(
+        key: Key(DateTime.now().millisecondsSinceEpoch.toString()),
+        background: Container(
+          color: Colors.red,
+          child: Align(
+            alignment: Alignment(-0.9, 0.0),
+            child: Icon(Icons.delete,color: Colors.white,),
+          ),
+        ),
+        direction: DismissDirection.startToEnd,
+        child: CheckboxListTile(
+          title: Text(_todoList[index]["title"]),
+          value: _todoList[index]["ok"],
+          secondary: CircleAvatar(
+            child: Icon((_todoList[index]["ok"] ? Icons.check : Icons.error)),
+          ),
+          onChanged: (c) {
+            setState(() {
+              _todoList[index]["ok"] = c;
+              _saveData();
+            });
+          },
+        ));
+  }
+
+  /* */
 
   Future<File> _getFie() async {
     final directory = await getApplicationDocumentsDirectory();
