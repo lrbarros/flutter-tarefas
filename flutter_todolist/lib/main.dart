@@ -19,17 +19,26 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-
+  @override
+  void initState() {
+    _readData().then((content) {
+     setState(() {
+       _todoList = json.decode(content);
+     });
+    });
+  }
   final _todoController = TextEditingController();
 
   List _todoList = [];
-  void addTodo(){
+
+  void addTodo() {
     setState(() {
-      Map<String,dynamic> newTodo = Map();
+      Map<String, dynamic> newTodo = Map();
       newTodo["title"] = _todoController.text;
-      _todoController.text="";
+      _todoController.text = "";
       newTodo["ok"] = false;
       _todoList.add(newTodo);
+      _saveData();
     });
   }
 
@@ -72,14 +81,17 @@ class _HomeState extends State<Home> {
                 padding: EdgeInsets.only(top: 10.0),
                 itemCount: _todoList.length,
                 itemBuilder: (context, index) {
-                  return CheckboxListTile (
+                  return CheckboxListTile(
                     title: Text(_todoList[index]["title"]),
                     value: _todoList[index]["ok"],
                     secondary: CircleAvatar(
-                        child: Icon((_todoList[index]["ok"]? Icons.check: Icons.error)),
-                    ), onChanged: (c) {
+                      child: Icon(
+                          (_todoList[index]["ok"] ? Icons.check : Icons.error)),
+                    ),
+                    onChanged: (c) {
                       setState(() {
                         _todoList[index]["ok"] = c;
+                        _saveData();
                       });
                     },
                   );
