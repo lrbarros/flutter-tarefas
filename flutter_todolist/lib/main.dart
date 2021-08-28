@@ -19,7 +19,19 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  List _todoList = [{"tittle":"Luiz" ,"ok":true}, {"tittle":"Flutter" ,"ok":true},];
+
+  final _todoController = TextEditingController();
+
+  List _todoList = [];
+  void addTodo(){
+    setState(() {
+      Map<String,dynamic> newTodo = Map();
+      newTodo["title"] = _todoController.text;
+      _todoController.text="";
+      newTodo["ok"] = false;
+      _todoList.add(newTodo);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +52,7 @@ class _HomeState extends State<Home> {
                 children: [
                   Expanded(
                     child: TextField(
+                      controller: _todoController,
                       decoration: InputDecoration(
                         labelText: "Nova Tarefa",
                         labelStyle: TextStyle(color: Colors.blueAccent),
@@ -47,7 +60,7 @@ class _HomeState extends State<Home> {
                     ),
                   ),
                   ElevatedButton(
-                      onPressed: () {},
+                      onPressed: addTodo,
                       child: Text(
                         "ADD",
                         style: TextStyle(color: Colors.white),
@@ -60,11 +73,15 @@ class _HomeState extends State<Home> {
                 itemCount: _todoList.length,
                 itemBuilder: (context, index) {
                   return CheckboxListTile (
-                    title: Text(_todoList[index]["tittle"]),
+                    title: Text(_todoList[index]["title"]),
                     value: _todoList[index]["ok"],
                     secondary: CircleAvatar(
                         child: Icon((_todoList[index]["ok"]? Icons.check: Icons.error)),
-                    ), onChanged: (_todoList [index]["ok"]) async {  },
+                    ), onChanged: (c) {
+                      setState(() {
+                        _todoList[index]["ok"] = c;
+                      });
+                    },
                   );
                 }),
           ),
