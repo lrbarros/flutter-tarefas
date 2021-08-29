@@ -31,6 +31,8 @@ class _HomeState extends State<Home> {
   final _todoController = TextEditingController();
 
   List _todoList = [];
+  Map<String, dynamic> _todoRemoved = Map();
+  int _lastDismiblePos = 0;
 
   void addTodo() {
     setState(() {
@@ -91,28 +93,51 @@ class _HomeState extends State<Home> {
 
   Widget buildItem(context, index) {
     return Dismissible(
-        key: Key(DateTime.now().millisecondsSinceEpoch.toString()),
-        background: Container(
-          color: Colors.red,
-          child: Align(
-            alignment: Alignment(-0.9, 0.0),
-            child: Icon(Icons.delete,color: Colors.white,),
+      key: Key(DateTime.now().millisecondsSinceEpoch.toString()),
+      background: Container(
+        color: Colors.red,
+        child: Align(
+          alignment: Alignment(-0.9, 0.0),
+          child: Icon(
+            Icons.delete,
+            color: Colors.white,
           ),
         ),
-        direction: DismissDirection.startToEnd,
-        child: CheckboxListTile(
-          title: Text(_todoList[index]["title"]),
-          value: _todoList[index]["ok"],
-          secondary: CircleAvatar(
-            child: Icon((_todoList[index]["ok"] ? Icons.check : Icons.error)),
-          ),
-          onChanged: (c) {
+      ),
+      direction: DismissDirection.startToEnd,
+      child: CheckboxListTile(
+        title: Text(_todoList[index]["title"]),
+        value: _todoList[index]["ok"],
+        secondary: CircleAvatar(
+          child: Icon((_todoList[index]["ok"] ? Icons.check : Icons.error)),
+        ),
+        onChanged: (c) {
+          setState(() {
+            _todoList[index]["ok"] = c;
+            _saveData();
+          });
+        },
+      ),
+      onDismissed: (direction) {
+        setState(() {
+          _todoRemoved = Map.from(_todoList[index]);
+          _lastDismiblePos = index;
+          _todoList.removeAt(index);
+          _saveData();
+        });
+
+        final snack = SnackBar(
+          content: Text("Tarefa \" ${_todoRemoved["title"]}\" removida"),
+          action: SnackBarAction(label: "Desfazer", onPressed: () {
             setState(() {
-              _todoList[index]["ok"] = c;
-              _saveData();
+              _todoList.insert(_lastDismiblePos, _todoRemoved);
             });
-          },
-        ));
+          }),
+          duration: Duration(seconds: 2),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(snack);
+      },
+    );
   }
 
   /* */
